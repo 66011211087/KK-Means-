@@ -1,1 +1,308 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Means Clustering | ML Visualization</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#07111f; --panel:#0d1b2e; --panel2:#11243b; --text:#eef5ff;
+  --muted:#9eb0c8; --blue:#5ee7ff; --purple:#9b8cff; --orange:#ffb86b;
+  --line:rgba(255,255,255,.10); --white:#fff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+  radial-gradient(circle at 15% 10%,rgba(94,231,255,.13),transparent 28%),
+  radial-gradient(circle at 85% 25%,rgba(155,140,255,.14),transparent 30%),
+  var(--bg);color:var(--text);font-family:"Prompt",system-ui,sans-serif;
+}
+.container{max-width:1180px;margin:auto;padding:34px 22px 70px}
+.hero{
+  position:relative;overflow:hidden;padding:52px 48px;border:1px solid var(--line);
+  border-radius:30px;background:linear-gradient(135deg,rgba(17,36,59,.95),rgba(10,22,39,.95));
+  box-shadow:0 30px 80px rgba(0,0,0,.28);margin-bottom:22px;
+}
+.hero:after{
+  content:"";position:absolute;width:300px;height:300px;border-radius:50%;
+  right:-100px;top:-130px;background:rgba(94,231,255,.12);filter:blur(10px)
+}
+.eyebrow{color:var(--blue);font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(38px,6vw,70px);line-height:1.05;margin:12px 0}
+.hero p{color:var(--muted);max-width:780px;font-size:17px}
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.pill{border:1px solid var(--line);background:rgba(255,255,255,.045);padding:8px 13px;border-radius:999px;color:#dce8f8}
+.section{
+  margin-top:22px;padding:30px;border:1px solid var(--line);border-radius:24px;
+  background:rgba(13,27,46,.82);box-shadow:0 16px 45px rgba(0,0,0,.16)
+}
+.section-title{display:flex;align-items:end;gap:14px;margin-bottom:20px}
+.section-title .n{font-size:13px;color:var(--blue);font-weight:700;letter-spacing:1px}
+h2{margin:0;font-size:28px}
+h3{margin:18px 0 8px}
+.muted{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.mini{
+  padding:20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035)
+}
+.mini .icon{font-size:28px;margin-bottom:8px}
+.mini b{display:block;margin-bottom:5px}
+.formula{
+  padding:16px 20px;border-radius:15px;background:#081524;border:1px solid rgba(94,231,255,.16);
+  font-family:Georgia,serif;font-size:20px;color:#f4fbff;margin:12px 0
+}
+.data{
+  display:flex;gap:10px;flex-wrap:wrap;margin:15px 0
+}
+.data span{
+  min-width:54px;text-align:center;padding:10px 13px;border-radius:12px;
+  font-weight:700;background:#162b46;border:1px solid var(--line)
+}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.flow-card{
+  position:relative;padding:18px;border-radius:17px;background:linear-gradient(180deg,#132942,#0e1e32);
+  border:1px solid var(--line)
+}
+.flow-card:not(:last-child):after{content:"→";position:absolute;right:-15px;top:38%;z-index:2;color:var(--blue);font-size:23px}
+.stepnum{
+  display:inline-grid;place-items:center;width:31px;height:31px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--purple));color:#07111f;font-weight:800
+}
+table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid var(--line);border-radius:16px}
+th,td{padding:12px 10px;text-align:center;border-bottom:1px solid var(--line)}
+th{background:#152a44;color:#dcecff;font-weight:600}
+tr:last-child td{border-bottom:0}
+.c1{color:var(--blue);font-weight:700}.c2{color:var(--orange);font-weight:700}
+.diagram{
+  background:#081524;border:1px solid var(--line);border-radius:20px;padding:15px;overflow:hidden
+}
+svg{width:100%;height:auto;display:block}
+.callout{
+  border-left:4px solid var(--blue);padding:15px 18px;background:rgba(94,231,255,.06);
+  border-radius:0 13px 13px 0;margin-top:15px
+}
+.final{
+  display:grid;grid-template-columns:1fr 1fr;gap:15px
+}
+.finalbox{
+  padding:22px;border-radius:20px;border:1px solid var(--line);
+  background:linear-gradient(145deg,rgba(94,231,255,.07),rgba(155,140,255,.05))
+}
+.finalbox.orange{background:linear-gradient(145deg,rgba(255,184,107,.07),rgba(155,140,255,.05))}
+.finalbox .label{font-size:13px;color:var(--muted);letter-spacing:1px}
+.finalbox .cluster{font-size:25px;font-weight:700;margin:6px 0}
+.wcss{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:17px 20px;background:#081524;border:1px solid var(--line);border-radius:15px}
+.wcss strong{font-size:24px;color:var(--blue)}
+.footer{text-align:center;color:#71849e;margin-top:28px;font-size:13px}
+@media(max-width:800px){
+ .grid2,.final{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}.flow{grid-template-columns:1fr}
+ .flow-card:not(:last-child):after{content:"↓";right:50%;top:auto;bottom:-25px}
+ .hero{padding:35px 25px}.section{padding:23px 18px}
+}
+@media print{
+ body{background:white;color:#111}.hero,.section{box-shadow:none;background:white;border:1px solid #ddd}
+ .muted{color:#555}.formula,.diagram{background:#f7f8fa;color:#111}
+ .pill{color:#111}.footer{color:#555}
+}
+</style>
+</head>
+<body>
+<div class="container">
 
+<header class="hero">
+  <div class="eyebrow">Machine Learning • Theoretical-based Examination</div>
+  <h1>K-Means<br>Clustering</h1>
+  <p>
+    Interactive-style visualization ที่อธิบายตั้งแต่การเลือก Centroid,
+    การจัดกลุ่มข้อมูล, การคำนวณ Centroid ใหม่ จนถึงการตรวจสอบ Convergence
+    ด้วยตัวอย่างข้อมูล 1 มิติ
+  </p>
+  <div class="pills">
+    <span class="pill">Unsupervised Learning</span>
+    <span class="pill">Partitional Clustering</span>
+    <span class="pill">K = 2</span>
+    <span class="pill">Dataset: 2, 4, 10, 12, 14</span>
+  </div>
+</header>
+
+<section class="section">
+  <div class="section-title"><span class="n">01</span><h2>แนวคิดของ K-Means</h2></div>
+  <p class="muted">
+    K-Means เป็นอัลกอริทึมแบบ Unsupervised Learning สำหรับแบ่งข้อมูลที่ไม่มีป้ายกำกับ
+    (Unlabeled Data) ออกเป็น K กลุ่ม โดยต้องการให้ข้อมูลในกลุ่มเดียวกันมีความคล้ายคลึงกัน
+    และลดความแปรปรวนภายในกลุ่ม หรือ Within-Cluster Sum of Squares (WCSS)
+  </p>
+  <div class="grid3">
+    <div class="mini"><div class="icon">①</div><b>Choose K</b><span class="muted">กำหนดจำนวน Cluster</span></div>
+    <div class="mini"><div class="icon">②</div><b>Assign</b><span class="muted">เลือก Centroid ที่ใกล้ที่สุด</span></div>
+    <div class="mini"><div class="icon">③</div><b>Update</b><span class="muted">หาค่าเฉลี่ยเพื่อย้าย Centroid</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">02</span><h2>Algorithm Flow</h2></div>
+  <div class="flow">
+    <div class="flow-card"><span class="stepnum">1</span><h3>Initialize</h3><span class="muted">เลือก Centroid เริ่มต้น K จุด</span></div>
+    <div class="flow-card"><span class="stepnum">2</span><h3>Assign</h3><span class="muted">จัดข้อมูลเข้ากลุ่มที่ใกล้ที่สุด</span></div>
+    <div class="flow-card"><span class="stepnum">3</span><h3>Update</h3><span class="muted">คำนวณค่าเฉลี่ยหา Centroid ใหม่</span></div>
+    <div class="flow-card"><span class="stepnum">4</span><h3>Converge</h3><span class="muted">ทำซ้ำจน Centroid ไม่เปลี่ยน</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">03</span><h2>ตัวอย่างโจทย์</h2></div>
+  <div class="grid2">
+    <div>
+      <p class="muted">ชุดข้อมูลคะแนน 1 มิติ</p>
+      <div class="formula">D = {2, 4, 10, 12, 14}</div>
+    </div>
+    <div>
+      <p class="muted">กำหนดจำนวนกลุ่มและ Centroid เริ่มต้น</p>
+      <div class="formula">K = 2 &nbsp;&nbsp; | &nbsp;&nbsp; C₁ = 2, C₂ = 12</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">04</span><h2>Iteration 1 — Assign</h2></div>
+  <p class="muted">วัดระยะห่างจากข้อมูลแต่ละจุดไปยัง Centroid ทั้งสอง แล้วเลือกค่าที่น้อยกว่า</p>
+  <div class="formula">Distance = |x − C|</div>
+  <table>
+    <thead><tr><th>Data</th><th>Distance to C₁ = 2</th><th>Distance to C₂ = 12</th><th>ผลการจัดกลุ่ม</th></tr></thead>
+    <tbody>
+      <tr><td>2</td><td>0</td><td>10</td><td class="c1">Cluster 1</td></tr>
+      <tr><td>4</td><td>2</td><td>8</td><td class="c1">Cluster 1</td></tr>
+      <tr><td>10</td><td>8</td><td>2</td><td class="c2">Cluster 2</td></tr>
+      <tr><td>12</td><td>10</td><td>0</td><td class="c2">Cluster 2</td></tr>
+      <tr><td>14</td><td>12</td><td>2</td><td class="c2">Cluster 2</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <b>ตัวอย่าง:</b> สำหรับข้อมูล 10 → |10−2| = 8 และ |10−12| = 2
+    ดังนั้น 10 ถูกจัดเข้า <b>Cluster 2</b> เพราะอยู่ใกล้ C₂ มากกว่า
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">05</span><h2>Visualization — การแบ่งกลุ่มครั้งแรก</h2></div>
+  <div class="diagram">
+    <svg viewBox="0 0 1100 360">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="1"><stop stop-color="#5ee7ff"/><stop offset="1" stop-color="#9b8cff"/></linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <text x="550" y="42" text-anchor="middle" fill="#eef5ff" font-size="25" font-weight="700">Iteration 1: Assign Data to Nearest Centroid</text>
+      <line x1="90" y1="190" x2="1010" y2="190" stroke="#50627b" stroke-width="3"/>
+      <g stroke="#50627b"><line x1="160" y1="180" x2="160" y2="200"/><line x1="300" y1="180" x2="300" y2="200"/><line x1="720" y1="180" x2="720" y2="200"/><line x1="860" y1="180" x2="860" y2="200"/><line x1="1000" y1="180" x2="1000" y2="200"/></g>
+      <g fill="#9eb0c8" font-size="16" text-anchor="middle"><text x="160" y="228">2</text><text x="300" y="228">4</text><text x="720" y="228">10</text><text x="860" y="228">12</text><text x="1000" y="228">14</text></g>
+      <circle cx="160" cy="190" r="17" fill="#5ee7ff" filter="url(#glow)"/><circle cx="300" cy="190" r="17" fill="#5ee7ff"/>
+      <circle cx="720" cy="190" r="17" fill="#ffb86b"/><circle cx="860" cy="190" r="17" fill="#ffb86b"/><circle cx="1000" cy="190" r="17" fill="#ffb86b"/>
+      <path d="M160 142 l18 18 -18 18 -18 -18z" fill="#fff"/><path d="M860 142 l18 18 -18 18 -18 -18z" fill="#fff"/>
+      <text x="160" y="110" text-anchor="middle" fill="#5ee7ff" font-size="19" font-weight="700">C₁ = 2</text>
+      <text x="860" y="110" text-anchor="middle" fill="#ffb86b" font-size="19" font-weight="700">C₂ = 12</text>
+      <text x="230" y="285" text-anchor="middle" fill="#5ee7ff" font-size="19" font-weight="700">Cluster 1</text>
+      <text x="230" y="313" text-anchor="middle" fill="#9eb0c8" font-size="16">{2, 4}</text>
+      <text x="860" y="285" text-anchor="middle" fill="#ffb86b" font-size="19" font-weight="700">Cluster 2</text>
+      <text x="860" y="313" text-anchor="middle" fill="#9eb0c8" font-size="16">{10, 12, 14}</text>
+    </svg>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">06</span><h2>Update — คำนวณ Centroid ใหม่</h2></div>
+  <div class="grid2">
+    <div class="mini">
+      <h3 class="c1">Cluster 1</h3>
+      <div class="formula">C₁,new = (2 + 4) / 2 = <b>3.0</b></div>
+      <p class="muted">นำค่าเฉลี่ยของสมาชิกใน Cluster 1</p>
+    </div>
+    <div class="mini">
+      <h3 class="c2">Cluster 2</h3>
+      <div class="formula">C₂,new = (10 + 12 + 14) / 3 = <b>12.0</b></div>
+      <p class="muted">นำค่าเฉลี่ยของสมาชิกใน Cluster 2</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">07</span><h2>Iteration 2 — Convergence Check</h2></div>
+  <p class="muted">ใช้ Centroid ใหม่ C₁ = 3 และ C₂ = 12 จัดข้อมูลซ้ำ</p>
+  <div class="grid2">
+    <div class="mini">
+      <h3>ข้อมูล 2 และ 4</h3>
+      <p>2 → |2−3| = 1 &lt; 10 → <span class="c1">Cluster 1</span></p>
+      <p>4 → |4−3| = 1 &lt; 8 → <span class="c1">Cluster 1</span></p>
+    </div>
+    <div class="mini">
+      <h3>ข้อมูล 10, 12 และ 14</h3>
+      <p>10 → 2 &lt; 7 → <span class="c2">Cluster 2</span></p>
+      <p>12 → 0 &lt; 9 → <span class="c2">Cluster 2</span></p>
+      <p>14 → 2 &lt; 11 → <span class="c2">Cluster 2</span></p>
+    </div>
+  </div>
+  <div class="callout">
+    <b>Convergence:</b> สมาชิกของแต่ละ Cluster ยังคงเหมือนเดิม
+    และ Centroid ไม่เปลี่ยนแปลง จึงยุติการทำงานของอัลกอริทึม
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">08</span><h2>Final Result</h2></div>
+  <div class="final">
+    <div class="finalbox">
+      <div class="label">CLUSTER 1</div>
+      <div class="cluster">Data = {2, 4}</div>
+      <div class="muted">Centroid = <b>3.0</b></div>
+    </div>
+    <div class="finalbox orange">
+      <div class="label">CLUSTER 2</div>
+      <div class="cluster">Data = {10, 12, 14}</div>
+      <div class="muted">Centroid = <b>12.0</b></div>
+    </div>
+  </div>
+  <div class="diagram" style="margin-top:18px">
+    <svg viewBox="0 0 1100 300">
+      <line x1="90" y1="155" x2="1010" y2="155" stroke="#50627b" stroke-width="3"/>
+      <g fill="#5ee7ff"><circle cx="160" cy="155" r="15"/><circle cx="300" cy="155" r="15"/></g>
+      <g fill="#ffb86b"><circle cx="720" cy="155" r="15"/><circle cx="860" cy="155" r="15"/><circle cx="1000" cy="155" r="15"/></g>
+      <path d="M230 112 l18 18 -18 18 -18 -18z" fill="#fff"/>
+      <path d="M860 112 l18 18 -18 18 -18 -18z" fill="#fff"/>
+      <g fill="#9eb0c8" font-size="16" text-anchor="middle"><text x="160" y="195">2</text><text x="300" y="195">4</text><text x="720" y="195">10</text><text x="860" y="195">12</text><text x="1000" y="195">14</text></g>
+      <text x="230" y="82" text-anchor="middle" fill="#5ee7ff" font-size="18" font-weight="700">C₁ = 3</text>
+      <text x="860" y="82" text-anchor="middle" fill="#ffb86b" font-size="18" font-weight="700">C₂ = 12</text>
+      <text x="230" y="250" text-anchor="middle" fill="#eef5ff" font-size="18">Cluster 1</text>
+      <text x="860" y="250" text-anchor="middle" fill="#eef5ff" font-size="18">Cluster 2</text>
+    </svg>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">09</span><h2>WCSS — Within-Cluster Sum of Squares</h2></div>
+  <p class="muted">ใช้วัดความกระจายของข้อมูลภายในแต่ละ Cluster จาก Centroid ของกลุ่ม</p>
+  <div class="grid2">
+    <div class="formula">WCSS₁ = (2−3)² + (4−3)² = 2</div>
+    <div class="formula">WCSS₂ = (10−12)² + (12−12)² + (14−12)² = 8</div>
+  </div>
+  <div class="wcss"><span>Total WCSS</span><strong>10</strong></div>
+</section>
+
+<section class="section">
+  <div class="section-title"><span class="n">10</span><h2>สรุปการทำงาน</h2></div>
+  <div class="formula" style="text-align:center">
+    Initialize → Assign → Update → Repeat → Convergence
+  </div>
+  <p class="muted">
+    จากตัวอย่าง K-Means ที่กำหนด K = 2 ข้อมูลถูกแบ่งออกเป็น 2 กลุ่มอย่างชัดเจน
+    หลังจาก Update Centroid แล้วทำการ Assign อีกครั้ง พบว่าสมาชิกของแต่ละกลุ่มไม่เปลี่ยนแปลง
+    จึงถือว่า Algorithm Converged และได้ผลลัพธ์สุดท้ายเป็น Cluster 1 = {2,4}
+    และ Cluster 2 = {10,12,14}
+  </p>
+</section>
+
+<div class="footer">K-Means Clustering Visualization • Machine Learning Theoretical-based Examination</div>
+</div>
+</body>
+</html>
