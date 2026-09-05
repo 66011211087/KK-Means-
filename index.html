@@ -2,1186 +2,181 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>K-Means Clustering — Interactive Visualization</title>
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
-
 :root{
-  --bg:#f7f8fc;
-  --card:#ffffff;
-  --text:#25283d;
-  --muted:#74788f;
-  --line:#e8eaf2;
-
-  --purple:#8175e8;
-  --purple-soft:#f0eeff;
-
-  --pink:#e99ab7;
-  --pink-soft:#fff0f5;
-
-  --mint:#79cbb4;
-  --mint-soft:#edf9f5;
-
-  --blue:#73a9df;
-  --blue-soft:#edf5ff;
-
-  --yellow:#efc56c;
-  --yellow-soft:#fff8e8;
-
-  --shadow:0 12px 35px rgba(53,57,91,.08);
-}
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:"Noto Sans Thai",sans-serif;
-  line-height:1.65;
-}
-
-.container{
-  width:min(1120px,92%);
-  margin:auto;
-}
-
-header{
-  padding:55px 0 35px;
-}
-
-.hero{
-  background:linear-gradient(135deg,#ffffff,#f6f3ff);
-  border:1px solid var(--line);
-  border-radius:30px;
-  padding:45px;
-  box-shadow:var(--shadow);
-}
-
-.badges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
-  margin-bottom:20px;
-}
-
-.badge{
-  padding:7px 13px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:700;
-  background:var(--purple-soft);
-  color:#6459c9;
-}
-
-.badge.green{
-  background:var(--mint-soft);
-  color:#398c76;
-}
-
-.badge.blue{
-  background:var(--blue-soft);
-  color:#4e83b9;
-}
-
-h1{
-  margin:0;
-  font-size:clamp(34px,5vw,58px);
-  line-height:1.15;
-  letter-spacing:-1px;
-}
-
-.hero p{
-  max-width:760px;
-  color:var(--muted);
-  margin:18px 0 0;
-  font-size:17px;
-}
-
-section{
-  margin:25px 0;
-}
-
-.card{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:24px;
-  padding:28px;
-  box-shadow:var(--shadow);
-}
-
-.section-title{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:20px;
-}
-
-.section-number{
-  width:34px;
-  height:34px;
-  border-radius:11px;
-  display:grid;
-  place-items:center;
-  background:var(--purple-soft);
-  color:var(--purple);
-  font-weight:800;
-}
-
-.section-title h2{
-  margin:0;
-  font-size:22px;
-}
-
-.concept-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-}
-
-.concept{
-  padding:20px;
-  border-radius:19px;
-}
-
-.concept:nth-child(1){
-  background:var(--purple-soft);
-}
-
-.concept:nth-child(2){
-  background:var(--blue-soft);
-}
-
-.concept:nth-child(3){
-  background:var(--mint-soft);
-}
-
-.concept strong{
-  display:block;
-  margin-bottom:6px;
-}
-
-.concept span{
-  color:var(--muted);
-  font-size:14px;
-}
-
-.flow{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-
-.flow-item{
-  position:relative;
-  padding:21px;
-  border-radius:20px;
-  background:#fafaff;
-  border:1px solid var(--line);
-  text-align:center;
-  transition:.3s;
-}
-
-.flow-item.active{
-  transform:translateY(-5px);
-  border-color:#bcb5fa;
-  box-shadow:0 10px 25px rgba(129,117,232,.14);
-  background:#f7f5ff;
-}
-
-.flow-number{
-  width:36px;
-  height:36px;
-  margin:auto auto 10px;
-  border-radius:50%;
-  background:var(--purple);
-  color:white;
-  display:grid;
-  place-items:center;
-  font-weight:800;
-}
-
-.flow-item strong{
-  display:block;
-  margin-bottom:4px;
-}
-
-.flow-item small{
-  color:var(--muted);
-}
-
-.example{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  background:var(--yellow-soft);
-  border-radius:20px;
-  padding:23px 27px;
-}
-
-.dataset{
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
-}
-
-.number{
-  min-width:42px;
-  height:42px;
-  padding:0 12px;
-  border-radius:13px;
-  background:white;
-  display:grid;
-  place-items:center;
-  font-weight:800;
-  border:1px solid #f0dfae;
-}
-
-.example-info{
-  text-align:right;
-  color:var(--muted);
-}
-
-.example-info strong{
-  color:var(--text);
-}
-
-.visual-layout{
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:20px;
-}
-
-.visual-box{
-  border-radius:22px;
-  background:#fbfbfe;
-  border:1px solid var(--line);
-  padding:20px;
-}
-
-svg{
-  width:100%;
-  height:auto;
-  display:block;
-}
-
-.axis{
-  stroke:#d9dbe6;
-  stroke-width:2;
-}
-
-.point{
-  transition:.5s;
-}
-
-.point.cluster1{
-  fill:var(--pink);
-}
-
-.point.cluster2{
-  fill:var(--blue);
-}
-
-.centroid{
-  transition:.6s;
-}
-
-.centroid.c1{
-  fill:var(--pink);
-}
-
-.centroid.c2{
-  fill:var(--blue);
-}
-
-.explanation{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
-
-.step-label{
-  color:var(--purple);
-  font-size:13px;
-  font-weight:800;
-  letter-spacing:.4px;
-  margin-bottom:5px;
-}
-
-.explanation h3{
-  margin:0 0 10px;
-  font-size:25px;
-}
-
-.explanation p{
-  color:var(--muted);
-  margin:0 0 18px;
-}
-
-.controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
-}
-
-button{
-  border:0;
-  cursor:pointer;
-  font-family:inherit;
-  font-weight:700;
-  padding:10px 16px;
-  border-radius:12px;
-  transition:.2s;
-}
-
-button:hover{
-  transform:translateY(-2px);
-}
-
-.btn-primary{
-  background:var(--purple);
-  color:white;
-}
-
-.btn-light{
-  background:#f0f1f6;
-  color:#555970;
-}
-
-.speed{
-  margin-top:18px;
-}
-
-.speed label{
-  display:flex;
-  justify-content:space-between;
-  font-size:13px;
-  color:var(--muted);
-}
-
-input[type=range]{
-  width:100%;
-  accent-color:var(--purple);
-}
-
-.calc-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:16px;
-}
-
-.calc{
-  border-radius:20px;
-  padding:23px;
-}
-
-.calc.one{
-  background:var(--pink-soft);
-}
-
-.calc.two{
-  background:var(--blue-soft);
-}
-
-.calc strong{
-  display:block;
-  margin-bottom:10px;
-}
-
-.formula{
-  font-size:18px;
-  font-weight:700;
-  background:white;
-  border-radius:13px;
-  padding:14px;
-}
-
-.convergence{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  align-items:center;
-}
-
-.conv-item{
-  text-align:center;
-  padding:19px 10px;
-  border-radius:18px;
-  background:#fafaff;
-  border:1px solid var(--line);
-  font-weight:700;
-}
-
-.arrow{
-  text-align:center;
-  color:#aaaec0;
-  font-size:23px;
-}
-
-.final-intro{
-  color:var(--muted);
-  margin-top:-5px;
-  margin-bottom:20px;
-}
-
-.result-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-}
-
-.result{
-  border-radius:24px;
-  padding:28px;
-  position:relative;
-  overflow:hidden;
-}
-
-.result.c1{
-  background:linear-gradient(135deg,#fff0f5,#fff9fb);
-}
-
-.result.c2{
-  background:linear-gradient(135deg,#edf5ff,#f8fbff);
-}
-
-.result h3{
-  margin:0 0 12px;
-  font-size:20px;
-}
-
-.members{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.member{
-  width:46px;
-  height:46px;
-  border-radius:14px;
-  background:white;
-  display:grid;
-  place-items:center;
-  font-weight:800;
-}
-
-.centroid-value{
-  margin-top:17px;
-  color:var(--muted);
-}
-
-.centroid-value strong{
-  color:var(--text);
-  font-size:24px;
-}
-
-.summary-chips{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:20px;
-}
-
-.chip{
-  padding:8px 13px;
-  border-radius:999px;
-  background:#f1f2f6;
-  color:#606478;
-  font-size:13px;
-  font-weight:700;
-}
-
-.wcss{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  background:var(--mint-soft);
-  padding:25px 28px;
-  border-radius:21px;
-}
-
-.wcss-value{
-  font-size:34px;
-  font-weight:800;
-  color:#398c76;
-}
-
-.summary{
-  background:#25283d;
-  color:white;
-}
-
-.summary p{
-  color:#d6d8e4;
-}
-
-.summary-points{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-
-.summary-point{
-  background:rgba(255,255,255,.07);
-  padding:17px;
-  border-radius:16px;
-}
-
-footer{
-  text-align:center;
-  color:#9a9daf;
-  padding:30px 0 50px;
-  font-size:13px;
-}
-
-@media(max-width:800px){
-  .hero{
-    padding:30px;
-  }
-
-  .concept-grid,
-  .flow,
-  .visual-layout,
-  .calc-grid,
-  .result-grid,
-  .summary-points{
-    grid-template-columns:1fr;
-  }
-
-  .convergence{
-    grid-template-columns:1fr;
-  }
-
-  .arrow{
-    transform:rotate(90deg);
-  }
-
-  .example,
-  .wcss{
-    flex-direction:column;
-    align-items:flex-start;
-  }
-
-  .example-info{
-    text-align:left;
-  }
-}
-
-@media print{
-  body{
-    background:white;
-  }
-
-  .card,
-  .hero{
-    box-shadow:none;
-  }
-
-  button,
-  .speed{
-    display:none;
-  }
-}
+ --bg:#f6f7fb;--paper:#fff;--ink:#222936;--muted:#737d8d;--line:#e6e9ef;
+ --pink:#e7a0bb;--pink-bg:#fff1f6;--pink-deep:#bf6389;
+ --blue:#83afe9;--blue-bg:#eef5ff;--blue-deep:#4d83c5;
+ --mint:#87cdb9;--mint-bg:#eef9f6;--mint-deep:#4f8f7d;
+ --yellow:#f0d37a;--yellow-bg:#fff9e9;
+ --shadow:0 12px 35px rgba(37,45,61,.055);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai",sans-serif}
+.page{max-width:1160px;margin:auto;padding:24px 20px 60px}
+.hero{position:relative;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:30px;padding:40px 42px;box-shadow:var(--shadow)}
+.hero:before{content:"";position:absolute;width:330px;height:330px;border-radius:50%;right:-105px;top:-170px;background:#ffe0eb}
+.hero:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:180px;bottom:-150px;background:#e2f5ef}
+.hero>*{position:relative;z-index:1}
+.kicker{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9299a7}
+.kicker:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pink);margin-right:7px}
+h1{font-size:clamp(39px,6vw,64px);line-height:1.03;letter-spacing:-.04em;margin:14px 0 12px;font-weight:700}
+.lead{max-width:770px;color:var(--muted);font-size:15px;line-height:1.9;margin:0}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.tag{padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:11px;font-weight:600;background:#fff}.tag.p{background:var(--pink-bg);border-color:#f4c7d8}.tag.b{background:var(--blue-bg);border-color:#cee0f7}.tag.m{background:var(--mint-bg);border-color:#c9e8df}
+
+.section{margin-top:25px}.head{margin:0 3px 10px}.eyebrow{font-size:10px;font-weight:700;letter-spacing:.13em;color:#9aa2ae}.head h2{font-size:22px;margin:3px 0 0;letter-spacing:-.02em}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:23px;box-shadow:var(--shadow)}
+
+.concept{padding:25px}.concept-layout{display:grid;grid-template-columns:1.35fr .65fr;gap:25px;align-items:center}.concept p{font-size:14px;color:#5e6878;line-height:1.95;margin:0}.concept p b{color:var(--ink)}
+.concept-points{display:grid;gap:8px}.concept-points div{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#fafbfc}.concept-points b{font-size:13px}.concept-points span{font-size:11px;color:var(--muted);margin-left:5px}
+
+.interactive{padding:20px}.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:13px}.bar-left{display:flex;align-items:center;gap:8px}.bar-left b{font-size:14px}.counter{font-size:10px;color:#8d96a4;background:#f7f8fa;border-radius:8px;padding:6px 9px}.speed{font-size:10px;color:#8d96a4;display:flex;gap:7px;align-items:center}.speed input{accent-color:#9a8bd4}
+.stage{background:linear-gradient(180deg,#fcfdff,#f8f9fc);border:1px solid #e9ecf2;border-radius:18px;padding:9px}.stage svg{width:100%;display:block}
+.legend{display:flex;justify-content:center;gap:18px;color:#818a98;font-size:10px;padding:6px}.legend span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}.legend .one:before{background:var(--pink)}.legend .two:before{background:var(--blue)}.legend .cen:before{background:#fff;border:2px solid #6d7380}
+.controls{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:13px}.btn{border:1px solid #dfe3e9;background:#fff;color:var(--ink);border-radius:11px;padding:9px 14px;font:600 11px "Noto Sans Thai";cursor:pointer;transition:.18s}.btn:hover{transform:translateY(-1px);box-shadow:0 6px 15px #2b344512}.btn.primary{background:#252d38;color:#fff;border-color:#252d38}.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.explain{display:grid;grid-template-columns:1fr 1fr;gap:13px}.box{padding:22px}.box h3{margin:0 0 9px;font-size:16px}.box p{font-size:13px;color:#687283;line-height:1.85;margin:0}.formula{margin-top:12px;padding:11px 13px;border-radius:12px;background:#faf8ff;border:1px solid #e9e2fb;color:#5f5291;font-size:12px;line-height:1.8;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:8px;border-bottom:1px solid #edf0f4;text-align:left}th{font-weight:600;color:#8b94a1}td:last-child,th:last-child{text-align:right}.c1{color:var(--pink-deep);font-weight:700}.c2{color:var(--blue-deep);font-weight:700}
+
+.update{display:grid;grid-template-columns:1fr 1fr;gap:12px}.math{padding:20px;border-radius:19px}.math.a{background:var(--pink-bg);border:1px solid #f4cadb}.math.b{background:var(--blue-bg);border:1px solid #d0e2f8}.math small{display:block;color:#87909e;font-size:10px;font-weight:700;margin-bottom:8px}.math strong{font-size:17px}.math span{display:block;margin-top:5px;color:#6d7787;font-size:11px}
+
+.converge{padding:23px}.converge-flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}.node{padding:12px 16px;border-radius:14px;border:1px solid var(--line);background:#fafbfc;text-align:center}.node b{display:block;font-size:13px}.node span{font-size:10px;color:var(--muted)}.node.ok{background:var(--mint-bg);border-color:#c9e8df}.arrow{color:#adb4bf;font-size:18px}.converge-note{text-align:center;color:#697485;font-size:12px;line-height:1.8;margin:15px auto 0;max-width:700px}
+
+.final{position:relative;padding:27px;overflow:hidden}.final:before{content:"FINAL RESULT";position:absolute;right:25px;top:22px;font-size:9px;letter-spacing:.14em;font-weight:700;color:#c2c7d0}
+.final-intro{font-size:13px;color:#6d7786;margin:0 0 17px;line-height:1.8}.final-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.cluster{position:relative;padding:23px;border-radius:20px;min-height:165px}.cluster.a{background:var(--pink-bg);border:1px solid #f4c8d9}.cluster.b{background:var(--blue-bg);border:1px solid #cfe1f7}.cluster .label{font-size:10px;letter-spacing:.1em;font-weight:700;color:#8b94a1}.cluster h3{font-size:27px;margin:10px 0 15px;letter-spacing:-.02em}.cluster .centroid{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(0,0,0,.06);padding-top:12px;font-size:11px;color:#707a89}.cluster .centroid b{font-size:18px}
+.summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:13px}.summary div{padding:13px 15px;background:#fafbfc;border:1px solid var(--line);border-radius:14px}.summary b{font-size:12px}.summary span{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+.wcss{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:21px 24px}.wcss strong{font-size:27px}.wcss p{font-size:10px;color:#7a8390;margin:4px 0 0}.status{padding:8px 11px;border-radius:10px;background:var(--mint-bg);border:1px solid #c8e7de;color:var(--mint-deep);font-size:10px;font-weight:700;white-space:nowrap}
+.footer{text-align:center;color:#a5acb6;font-size:9px;margin-top:27px}
+
+@media(max-width:760px){.concept-layout,.explain,.update,.final-grid{grid-template-columns:1fr}.summary{grid-template-columns:1fr}.hero{padding:29px 25px}.page{padding:14px}.interactive{padding:14px}.final:before{display:none}}
+@media print{body{background:#fff}.page{max-width:none;padding:0}.card,.hero{box-shadow:none}}
 </style>
 </head>
-
 <body>
+<main class="page">
 
-<div class="container">
-
-<header>
-  <div class="hero">
-    <div class="badges">
-      <span class="badge">Unsupervised Learning</span>
-      <span class="badge green">Partitional Clustering</span>
-      <span class="badge blue">K = 2</span>
-    </div>
-
-    <h1>K-Means<br>Clustering</h1>
-
-    <p>
-      อัลกอริทึมสำหรับแบ่งข้อมูลที่ไม่มี Label ออกเป็น K กลุ่ม
-      โดยจัดข้อมูลให้สมาชิกในกลุ่มเดียวกันมีความคล้ายกันมากที่สุด
-    </p>
-  </div>
-</header>
-
-<section>
-  <div class="card">
-    <div class="section-title">
-      <div class="section-number">01</div>
-      <h2>Concept</h2>
-    </div>
-
-    <div class="concept-grid">
-      <div class="concept">
-        <strong>Assign</strong>
-        <span>นำแต่ละจุดไปอยู่กับ Centroid ที่ใกล้ที่สุด</span>
-      </div>
-
-      <div class="concept">
-        <strong>Update</strong>
-        <span>คำนวณค่าเฉลี่ยของสมาชิกเพื่อหา Centroid ใหม่</span>
-      </div>
-
-      <div class="concept">
-        <strong>Convergence</strong>
-        <span>ทำซ้ำจนตำแหน่ง Centroid และสมาชิกไม่เปลี่ยน</span>
-      </div>
-    </div>
-  </div>
+<section class="hero">
+ <div class="kicker">MACHINE LEARNING · INTERACTIVE VISUALIZATION</div>
+ <h1>K-Means<br>Clustering</h1>
+ <p class="lead">K-Means คือวิธีแบ่ง <b>Unlabeled Data</b> ออกเป็น K กลุ่ม โดยให้ข้อมูลในกลุ่มเดียวกันอยู่ใกล้กันมากที่สุด ผ่านการสลับระหว่างการจัดกลุ่มและการปรับจุดศูนย์กลางจนผลลัพธ์คงที่</p>
+ <div class="tags"><span class="tag p">Unsupervised Learning</span><span class="tag b">Partitional Clustering</span><span class="tag m">K = 2</span><span class="tag">D = 2, 4, 10, 12, 14</span></div>
 </section>
 
-<section>
-  <div class="card">
-    <div class="section-title">
-      <div class="section-number">02</div>
-      <h2>Algorithm Flow</h2>
-    </div>
-
-    <div class="flow" id="flow">
-      <div class="flow-item active">
-        <div class="flow-number">1</div>
-        <strong>Initial Centroids</strong>
-        <small>เลือก Centroid เริ่มต้น</small>
-      </div>
-
-      <div class="flow-item">
-        <div class="flow-number">2</div>
-        <strong>Assign Points</strong>
-        <small>จัดกลุ่มตามระยะทาง</small>
-      </div>
-
-      <div class="flow-item">
-        <div class="flow-number">3</div>
-        <strong>Update</strong>
-        <small>หาค่าเฉลี่ยใหม่</small>
-      </div>
-
-      <div class="flow-item">
-        <div class="flow-number">4</div>
-        <strong>Converged</strong>
-        <small>ตรวจสอบการเปลี่ยนแปลง</small>
-      </div>
-    </div>
+<section class="section">
+ <div class="head"><div class="eyebrow">01 · CONCEPT</div><h2>แนวคิดของ K-Means</h2></div>
+ <div class="card concept">
+  <div class="concept-layout">
+   <p>อัลกอริทึมจะเริ่มจากการกำหนด <b>Centroid</b> จำนวน K จุด จากนั้นวัดระยะห่างของข้อมูลแต่ละจุดเพื่อเลือกกลุ่มที่ใกล้ที่สุด แล้วคำนวณค่าเฉลี่ยเพื่อย้าย Centroid กระบวนการนี้ทำซ้ำจน <b>Centroid ไม่เปลี่ยนแปลง</b> โดยมีเป้าหมายเพื่อลดค่า <b>WCSS</b></p>
+   <div class="concept-points">
+    <div><b>Assign</b><span>เลือก Cluster ที่ใกล้ที่สุด</span></div>
+    <div><b>Update</b><span>หาค่าเฉลี่ยเพื่อย้าย Centroid</span></div>
+    <div><b>Convergence</b><span>หยุดเมื่อผลลัพธ์ไม่เปลี่ยน</span></div>
+   </div>
   </div>
+ </div>
 </section>
 
-<section>
-  <div class="card">
-
-    <div class="section-title">
-      <div class="section-number">03</div>
-      <h2>Example Dataset</h2>
-    </div>
-
-    <div class="example">
-      <div>
-        <div style="font-weight:800;margin-bottom:10px;">
-          D = {2, 4, 10, 12, 14}
-        </div>
-
-        <div class="dataset">
-          <div class="number">2</div>
-          <div class="number">4</div>
-          <div class="number">10</div>
-          <div class="number">12</div>
-          <div class="number">14</div>
-        </div>
-      </div>
-
-      <div class="example-info">
-        K = <strong>2</strong><br>
-        C₁ = <strong>2</strong> &nbsp; C₂ = <strong>12</strong>
-      </div>
-    </div>
-
+<section class="section">
+ <div class="head"><div class="eyebrow">02 · INTERACTIVE ANIMATION</div><h2>ดู Algorithm ทำงานทีละขั้น</h2></div>
+ <div class="card interactive">
+  <div class="bar"><div class="bar-left"><b id="stepName">Step 1 — Initial Centroids</b><span class="counter" id="count">1 / 4</span></div><label class="speed">ความเร็ว <input id="speed" type="range" min="350" max="1800" value="900"></label></div>
+  <div class="stage">
+   <svg viewBox="0 0 1000 275">
+    <line x1="65" y1="165" x2="935" y2="165" stroke="#dfe4eb" stroke-width="3"/>
+    <g id="points"></g><g id="centroids"></g>
+    <g font-family="Noto Sans Thai" font-size="11" fill="#9ba3ae"><text x="65" y="198">0</text><text x="282" y="198">4</text><text x="500" y="198">8</text><text x="717" y="198">12</text><text x="935" y="198">16</text></g>
+    <text x="500" y="240" text-anchor="middle" font-family="Noto Sans Thai" font-size="11" fill="#a0a7b2">แกนคะแนนข้อมูล 1 มิติ</text>
+   </svg>
+   <div class="legend"><span class="one">Cluster 1</span><span class="two">Cluster 2</span><span class="cen">Centroid</span></div>
   </div>
+  <div class="controls"><button class="btn" id="prev">← ก่อนหน้า</button><button class="btn primary" id="next">ถัดไป →</button><button class="btn" id="play">▶ เล่นอัตโนมัติ</button><button class="btn" id="reset">↺ เริ่มใหม่</button></div>
+ </div>
 </section>
 
-<section>
-  <div class="card">
-
-    <div class="section-title">
-      <div class="section-number">04</div>
-      <h2>Interactive K-Means Process</h2>
-    </div>
-
-    <div class="visual-layout">
-
-      <div class="visual-box">
-
-        <svg viewBox="0 0 760 300">
-
-          <line x1="70" y1="240" x2="710" y2="240" class="axis"/>
-
-          <g id="points">
-
-            <circle class="point cluster1" cx="120" cy="180" r="13"/>
-            <circle class="point cluster1" cx="210" cy="180" r="13"/>
-
-            <circle class="point cluster2" cx="485" cy="180" r="13"/>
-            <circle class="point cluster2" cx="575" cy="180" r="13"/>
-            <circle class="point cluster2" cx="665" cy="180" r="13"/>
-
-          </g>
-
-          <g id="centroids">
-
-            <circle
-              id="centroid1"
-              class="centroid c1"
-              cx="120"
-              cy="110"
-              r="17"
-            />
-
-            <circle
-              id="centroid2"
-              class="centroid c2"
-              cx="575"
-              cy="110"
-              r="17"
-            />
-
-          </g>
-
-          <g font-family="Noto Sans Thai" font-size="15" font-weight="700">
-
-            <text x="110" y="275">2</text>
-            <text x="200" y="275">4</text>
-            <text x="475" y="275">10</text>
-            <text x="565" y="275">12</text>
-            <text x="655" y="275">14</text>
-
-          </g>
-
-        </svg>
-
-      </div>
-
-      <div class="explanation">
-
-        <div class="step-label" id="stepLabel">
-          STEP 1
-        </div>
-
-        <h3 id="stepTitle">
-          Initial Centroids
-        </h3>
-
-        <p id="stepText">
-          เริ่มต้นด้วยการเลือก Centroid จำนวน K = 2
-          โดยกำหนด C₁ = 2 และ C₂ = 12
-        </p>
-
-        <div class="controls">
-
-          <button class="btn-light" onclick="prevStep()">
-            ← Previous
-          </button>
-
-          <button class="btn-primary" onclick="nextStep()">
-            Next →
-          </button>
-
-          <button class="btn-light" onclick="toggleAuto()" id="autoBtn">
-            ▶ Auto Play
-          </button>
-
-          <button class="btn-light" onclick="resetStep()">
-            Reset
-          </button>
-
-        </div>
-
-        <div class="speed">
-
-          <label>
-            <span>Animation Speed</span>
-            <span id="speedValue">1.0×</span>
-          </label>
-
-          <input
-            id="speed"
-            type="range"
-            min="0.5"
-            max="2"
-            step="0.5"
-            value="1"
-            oninput="updateSpeed()"
-          >
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
+<section class="section">
+ <div class="head"><div class="eyebrow">03 · STEP EXPLANATION</div><h2>สรุปสิ่งที่เกิดขึ้นในแต่ละรอบ</h2></div>
+ <div class="explain">
+  <div class="card box"><h3 id="exTitle">Step 1 — Initial Centroids</h3><p id="exText">กำหนด Centroid เริ่มต้น 2 จุดตามโจทย์ คือ C₁ = 2 และ C₂ = 12 เพื่อใช้เป็นจุดอ้างอิงในการแบ่งข้อมูล</p><div class="formula" id="formula">C₁ = 2  |  C₂ = 12</div></div>
+  <div class="card box"><h3>ผลการ Assign</h3><table><thead><tr><th>ข้อมูล</th><th>กลุ่ม</th><th>ระยะที่สั้นที่สุด</th></tr></thead><tbody id="rows"></tbody></table></div>
+ </div>
 </section>
 
-<section>
-  <div class="card">
-
-    <div class="section-title">
-      <div class="section-number">05</div>
-      <h2>Centroid Update</h2>
-    </div>
-
-    <div class="calc-grid">
-
-      <div class="calc one">
-
-        <strong>Cluster 1</strong>
-
-        <div class="formula">
-          C₁,new = (2 + 4) / 2 = <b>3.0</b>
-        </div>
-
-      </div>
-
-      <div class="calc two">
-
-        <strong>Cluster 2</strong>
-
-        <div class="formula">
-          C₂,new = (10 + 12 + 14) / 3 = <b>12.0</b>
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
+<section class="section">
+ <div class="head"><div class="eyebrow">04 · UPDATE</div><h2>คำนวณ Centroid ใหม่</h2></div>
+ <div class="update">
+  <div class="math a"><small>CLUSTER 1</small><strong>C₁,new = (2 + 4) / 2 = 3.0</strong><span>ค่าเฉลี่ยของสมาชิก {2, 4}</span></div>
+  <div class="math b"><small>CLUSTER 2</small><strong>C₂,new = (10 + 12 + 14) / 3 = 12.0</strong><span>ค่าเฉลี่ยของสมาชิก {10, 12, 14}</span></div>
+ </div>
 </section>
 
-<section>
-  <div class="card">
-
-    <div class="section-title">
-      <div class="section-number">06</div>
-      <h2>Convergence</h2>
-    </div>
-
-    <div class="convergence">
-
-      <div class="conv-item">
-        Centroid ใหม่
-      </div>
-
-      <div class="arrow">→</div>
-
-      <div class="conv-item">
-        Assign ซ้ำ
-      </div>
-
-      <div class="arrow">→</div>
-
-      <div class="conv-item">
-        สมาชิกเหมือนเดิม
-      </div>
-
-      <div class="arrow">→</div>
-
-      <div class="conv-item">
-        Converged ✓
-      </div>
-
-    </div>
-
+<section class="section">
+ <div class="head"><div class="eyebrow">05 · CONVERGENCE</div><h2>ทำไมจึงหยุดการทำงาน?</h2></div>
+ <div class="card converge">
+  <div class="converge-flow">
+   <div class="node"><b>Centroid ใหม่</b><span>3.0 , 12.0</span></div><div class="arrow">→</div>
+   <div class="node"><b>Assign ซ้ำ</b><span>สมาชิกเหมือนเดิม</span></div><div class="arrow">→</div>
+   <div class="node ok"><b>Converged ✓</b><span>Centroid ไม่เปลี่ยน</span></div>
   </div>
+  <p class="converge-note">เมื่อนำ C₁ = 3 และ C₂ = 12 ไปจัดสรรข้อมูลอีกครั้ง ทุกจุดยังอยู่ในกลุ่มเดิม ดังนั้นค่าเฉลี่ยของแต่ละกลุ่มจึงยังเท่าเดิม และอัลกอริทึมยุติการทำงาน</p>
+ </div>
 </section>
 
-<section>
-  <div class="card">
-
-    <div class="section-title">
-      <div class="section-number">07</div>
-      <h2>Final Result</h2>
-    </div>
-
-    <p class="final-intro">
-      หลังจากทำซ้ำจนกลุ่มข้อมูลไม่เปลี่ยนแปลง
-      จะได้ผลลัพธ์สุดท้ายดังนี้
-    </p>
-
-    <div class="result-grid">
-
-      <div class="result c1">
-
-        <h3>Cluster 1</h3>
-
-        <div class="members">
-          <div class="member">2</div>
-          <div class="member">4</div>
-        </div>
-
-        <div class="centroid-value">
-          Centroid
-          <strong>3.0</strong>
-        </div>
-
-      </div>
-
-      <div class="result c2">
-
-        <h3>Cluster 2</h3>
-
-        <div class="members">
-          <div class="member">10</div>
-          <div class="member">12</div>
-          <div class="member">14</div>
-        </div>
-
-        <div class="centroid-value">
-          Centroid
-          <strong>12.0</strong>
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="summary-chips">
-      <div class="chip">K = 2</div>
-      <div class="chip">5 Data Points</div>
-      <div class="chip">Converged ✓</div>
-    </div>
-
+<section class="section">
+ <div class="head"><div class="eyebrow">06 · FINAL RESULT</div><h2>ผลลัพธ์หลัง Convergence</h2></div>
+ <div class="card final">
+  <p class="final-intro">หลังจากกระบวนการ Converged แล้ว ข้อมูลถูกแบ่งออกเป็น 2 กลุ่มตามตำแหน่งของ Centroid สุดท้าย</p>
+  <div class="final-grid">
+   <div class="cluster a"><div class="label">CLUSTER 1</div><h3>{ 2, 4 }</h3><div class="centroid"><span>Centroid</span><b>3.0</b></div></div>
+   <div class="cluster b"><div class="label">CLUSTER 2</div><h3>{ 10, 12, 14 }</h3><div class="centroid"><span>Centroid</span><b>12.0</b></div></div>
   </div>
+  <div class="summary"><div><b>จำนวนกลุ่ม</b><span>K = 2</span></div><div><b>ข้อมูลทั้งหมด</b><span>5 Points</span></div><div><b>สถานะ</b><span>Converged</span></div></div>
+ </div>
 </section>
 
-<section>
-  <div class="card">
-
-    <div class="section-title">
-      <div class="section-number">08</div>
-      <h2>WCSS</h2>
-    </div>
-
-    <div class="wcss">
-
-      <div>
-        <strong>Within-Cluster Sum of Squares</strong>
-
-        <div style="color:var(--muted);margin-top:5px;">
-          ผลรวมระยะห่างกำลังสองของข้อมูลจาก Centroid
-          ภายในแต่ละ Cluster
-        </div>
-      </div>
-
-      <div class="wcss-value">
-        10
-      </div>
-
-    </div>
-
-  </div>
+<section class="section">
+ <div class="card wcss"><div><strong>WCSS = 10</strong><p>(2−3)² + (4−3)² + (10−12)² + (12−12)² + (14−12)²</p></div><div class="status">✓ Final Result</div></div>
 </section>
 
-<section>
-  <div class="card summary">
-
-    <div class="section-title">
-      <div
-        class="section-number"
-        style="background:rgba(255,255,255,.1);color:white"
-      >
-        09
-      </div>
-
-      <h2>Summary</h2>
-    </div>
-
-    <div class="summary-points">
-
-      <div class="summary-point">
-        K-Means เป็น Unsupervised Learning
-      </div>
-
-      <div class="summary-point">
-        ใช้ Centroid เพื่อแบ่งข้อมูลออกเป็น K กลุ่ม
-      </div>
-
-      <div class="summary-point">
-        ทำซ้ำ Assign และ Update จนเกิด Convergence
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-<footer>
-  K-Means Clustering — Machine Learning Theoretical-based Examination
-</footer>
-
-</div>
+<div class="footer">K-Means Clustering · Interactive ML Visualization</div>
+</main>
 
 <script>
-
-let currentStep = 1;
-let autoPlay = null;
-let speed = 1;
-
-const stepData = {
-
-  1:{
-    label:"STEP 1",
-    title:"Initial Centroids",
-    text:"เริ่มต้นด้วยการเลือก Centroid จำนวน K = 2 โดยกำหนด C₁ = 2 และ C₂ = 12",
-    c1:120,
-    c2:575
-  },
-
-  2:{
-    label:"STEP 2",
-    title:"Assign Points",
-    text:"คำนวณระยะห่างของแต่ละจุดจาก Centroid แล้วจัดจุดให้อยู่กับ Centroid ที่ใกล้ที่สุด",
-    c1:120,
-    c2:575
-  },
-
-  3:{
-    label:"STEP 3",
-    title:"Update Centroids",
-    text:"คำนวณค่าเฉลี่ยของสมาชิกในแต่ละ Cluster เพื่อหาตำแหน่ง Centroid ใหม่",
-    c1:165,
-    c2:575
-  },
-
-  4:{
-    label:"STEP 4",
-    title:"Converged",
-    text:"เมื่อ Assign ซ้ำแล้วสมาชิกในแต่ละ Cluster ไม่เปลี่ยนแปลง แสดงว่าอัลกอริทึม Converged",
-    c1:165,
-    c2:575
-  }
-
-};
-
-function renderStep(){
-
-  const data = stepData[currentStep];
-
-  document.getElementById("stepLabel").textContent = data.label;
-  document.getElementById("stepTitle").textContent = data.title;
-  document.getElementById("stepText").textContent = data.text;
-
-  document.getElementById("centroid1")
-    .setAttribute("cx",data.c1);
-
-  document.getElementById("centroid2")
-    .setAttribute("cx",data.c2);
-
-  const flowItems =
-    document.querySelectorAll(".flow-item");
-
-  flowItems.forEach((item,index)=>{
-
-    item.classList.toggle(
-      "active",
-      index === currentStep - 1
-    );
-
-  });
-
+const data=[2,4,10,12,14];
+const steps=[
+ {name:"Step 1 — Initial Centroids",text:"กำหนด Centroid เริ่มต้น 2 จุดตามโจทย์ คือ C₁ = 2 และ C₂ = 12 เพื่อใช้เป็นจุดอ้างอิงในการแบ่งข้อมูล",formula:"C₁ = 2  |  C₂ = 12",c:[2,12],g:[0,0,1,1,1]},
+ {name:"Step 2 — Assign Points",text:"วัดระยะห่างของข้อมูลแต่ละจุดไปยัง Centroid ทั้งสอง แล้วเลือก Cluster ที่มีระยะห่างน้อยที่สุด",formula:"distance = |x − C|",c:[2,12],g:[0,0,1,1,1]},
+ {name:"Step 3 — Update Centroids",text:"นำสมาชิกของแต่ละ Cluster มาหาค่าเฉลี่ยเลขคณิต เพื่อหาตำแหน่ง Centroid ใหม่",formula:"C₁,new = 3.0  |  C₂,new = 12.0",c:[3,12],g:[0,0,1,1,1]},
+ {name:"Step 4 — Converged",text:"จัดสรรข้อมูลซ้ำด้วย Centroid ใหม่ พบว่าสมาชิกทุกกลุ่มยังเหมือนเดิม จึงไม่มีการเปลี่ยนแปลงและหยุดการทำงาน",formula:"C₁ = 3.0  |  C₂ = 12.0  →  STOP",c:[3,12],g:[0,0,1,1,1]}
+];
+let current=0,timer=null;
+const NS="http://www.w3.org/2000/svg",pg=document.getElementById("points"),cg=document.getElementById("centroids");
+function X(v){return 65+(v/16)*870}
+function render(){
+ const s=steps[current];
+ document.getElementById("stepName").textContent=s.name;
+ document.getElementById("count").textContent=(current+1)+" / 4";
+ document.getElementById("exTitle").textContent=s.name;
+ document.getElementById("exText").textContent=s.text;
+ document.getElementById("formula").textContent=s.formula;
+ pg.innerHTML="";cg.innerHTML="";
+ data.forEach((v,i)=>{let g=document.createElementNS(NS,"g"),col=s.g[i]===0?"#e7a0bb":"#83afe9";g.innerHTML=`<circle cx="${X(v)}" cy="165" r="10" fill="${col}"/><text x="${X(v)}" y="142" text-anchor="middle" font-family="Noto Sans Thai" font-size="12" fill="#687283">${v}</text>`;pg.appendChild(g)});
+ s.c.forEach((v,i)=>{let g=document.createElementNS(NS,"g"),col=i===0?"#bf6389":"#4d83c5";g.innerHTML=`<circle cx="${X(v)}" cy="165" r="24" fill="none" stroke="${col}" stroke-width="3"/><circle cx="${X(v)}" cy="165" r="5" fill="${col}"/><text x="${X(v)}" y="94" text-anchor="middle" font-family="Noto Sans Thai" font-size="13" font-weight="700" fill="${col}">C${i+1} = ${v.toFixed(1)}</text>`;cg.appendChild(g)});
+ const rows=document.getElementById("rows");rows.innerHTML="";
+ data.forEach((v,i)=>{let d=Math.min(Math.abs(v-s.c[0]),Math.abs(v-s.c[1]));let tr=document.createElement("tr");tr.innerHTML=`<td>${v}</td><td class="${s.g[i]===0?"c1":"c2"}">Cluster ${s.g[i]+1}</td><td>${current===0?"—":d}</td>`;rows.appendChild(tr)});
+ document.getElementById("prev").disabled=current===0;document.getElementById("next").disabled=current===3;
 }
-
-function nextStep(){
-
-  currentStep++;
-
-  if(currentStep > 4){
-    currentStep = 1;
-  }
-
-  renderStep();
-
-}
-
-function prevStep(){
-
-  currentStep--;
-
-  if(currentStep < 1){
-    currentStep = 4;
-  }
-
-  renderStep();
-
-}
-
-function resetStep(){
-
-  stopAuto();
-
-  currentStep = 1;
-
-  renderStep();
-
-}
-
-function toggleAuto(){
-
-  if(autoPlay){
-
-    stopAuto();
-
-  }else{
-
-    document.getElementById("autoBtn")
-      .textContent = "⏸ Stop";
-
-    autoPlay = setInterval(
-      nextStep,
-      2200 / speed
-    );
-
-  }
-
-}
-
-function stopAuto(){
-
-  clearInterval(autoPlay);
-
-  autoPlay = null;
-
-  document.getElementById("autoBtn")
-    .textContent = "▶ Auto Play";
-
-}
-
-function updateSpeed(){
-
-  speed = Number(
-    document.getElementById("speed").value
-  );
-
-  document.getElementById("speedValue")
-    .textContent = speed.toFixed(1) + "×";
-
-  if(autoPlay){
-
-    stopAuto();
-    toggleAuto();
-
-  }
-
-}
-
-renderStep();
-
+function stop(){clearInterval(timer);timer=null;document.getElementById("play").textContent="▶ เล่นอัตโนมัติ"}
+document.getElementById("next").onclick=()=>{if(current<3){current++;render()}};
+document.getElementById("prev").onclick=()=>{if(current>0){current--;render()}};
+document.getElementById("reset").onclick=()=>{stop();current=0;render()};
+document.getElementById("play").onclick=()=>{if(timer){stop();return}if(current===3)current=0;document.getElementById("play").textContent="Ⅱ หยุด";timer=setInterval(()=>{if(current<3){current++;render()}else stop()},+document.getElementById("speed").value)};
+document.getElementById("speed").oninput=()=>{if(timer){stop();document.getElementById("play").click()}};
+render();
 </script>
-
 </body>
 </html>
